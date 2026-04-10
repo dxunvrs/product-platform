@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '9.4.1'
+}
+
+group = 'com.dxunvrs'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.postgresql:postgresql:latest.release'
+    implementation 'io.github.cdimascio:dotenv-java:latest.release'
+
+    implementation 'org.mindrot:jbcrypt:latest.release'
+
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    implementation 'io.lettuce:lettuce-core:latest.release'
+
+    implementation 'com.zaxxer:HikariCP:7.0.2'
+    implementation 'org.jdbi:jdbi3-core:3.52.0'
+    implementation 'org.jdbi:jdbi3-sqlobject:3.52.0'
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:latest.release'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:latest.release'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:latest.release'
+    implementation 'org.slf4j:slf4j-api:2.0.17'
+    implementation 'ch.qos.logback:logback-classic:latest.release'
+
+    implementation 'com.dxunvrs:common:1.0'
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    archiveVersion.set('')
+
+    manifest {
+        attributes 'Main-Class': 'Main'
+    }
+}

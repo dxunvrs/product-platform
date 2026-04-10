@@ -1,0 +1,93 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: product-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=roma
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=study
+    ports:
+      - ":5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: product-redis
+    restart: always
+    ports:
+      - ":6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  gateway:
+    build: 
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: gateway
+    restart: on-failure
+    ports:
+      - "9999:1984/udp"
+      - ":1488"
+    environment:
+      - GATEWAY_CLIENT_PORT=1984
+      - GATEWAY_SERVER_PORT=1488
+    stdin_open: true
+    tty: true
+
+  cache-warmer:
+    build: 
+      context: .
+      dockerfile: product-service/Dockerfile
+    entrypoint: ["java", "-cp", "app.jar", "utility.CacheWarmer"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DB_USER=roma
+      - DB_PASS=admin
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=study
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  server:
+    build: 
+      context: .
+      dockerfile: product-service/Dockerfile
+    restart: on-failure
+    depends_on:
+      cache-warmer:
+        condition: service_completed_successfully
+    environment:
+      - DB_USER=roma
+      - DB_PASS=admin
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=study
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=super_secret_string_hello_world_1234567890
+      - GATEWAY_HOST=gateway
+      - GATEWAY_SERVER_PORT=1488
+    stdin_open: true
+    tty: true
+
+volumes:
+  pgdata:
+  redis-data:

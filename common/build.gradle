@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group = 'com.dxunvrs'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-databind:latest.release'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:latest.release'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:latest.release'
+
+    implementation 'org.jdbi:jdbi3-sqlobject:3.52.0'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}

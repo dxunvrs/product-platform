@@ -1,0 +1,20 @@
+<configuration>
+    <appender name="gateway_log" class="ch.qos.logback.core.FileAppender">
+        <file>logs/gateway.log</file>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="TRACE">
+        <appender-ref ref="gateway_log" />
+        <appender-ref ref="console" />
+    </root>
+</configuration>
