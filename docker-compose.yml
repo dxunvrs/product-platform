@@ -66,7 +66,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
 
-  server:
+  product-service:
     build: 
       context: .
       dockerfile: product-service/Dockerfile
@@ -85,6 +85,20 @@ services:
       - JWT_SECRET=super_secret_string_hello_world_1234567890
       - GATEWAY_HOST=gateway
       - GATEWAY_SERVER_PORT=1488
+    stdin_open: true
+    tty: true
+  
+  auth-service:
+    build: auth-service/.
+    restart: on-failure
+    ports:
+      - ":5252"
+    environment:
+      - DB_USER=roma
+      - DB_PASS=admin
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=study
     stdin_open: true
     tty: true
 

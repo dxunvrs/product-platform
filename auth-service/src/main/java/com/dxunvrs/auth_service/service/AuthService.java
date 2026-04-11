@@ -2,7 +2,6 @@ package com.dxunvrs.auth_service.service;
 
 import com.dxunvrs.auth_service.exception.InvalidAuthorizeException;
 import com.dxunvrs.auth_service.repository.UserDao;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
