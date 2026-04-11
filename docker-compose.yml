@@ -44,6 +44,8 @@ services:
     environment:
       - GATEWAY_CLIENT_PORT=1984
       - GATEWAY_SERVER_PORT=1488
+      - AUTH_SERVICE_URL=http://auth-service:5252/auth
+      - PUBLIC_KEY=-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApa3QUQLUcLyZn0uQ7VGTpafqWPZ1kYaOV4M8etcvv+6pvi7Za2QPIgKQiRK/VfGcJBU8sKXMXCNr091N+0F9/Myjy+wv/QiC7AndHHW4qXcG5x5wek2urolzXag3EEz3oOD+TfM7r8mV2M4K6OmrhLD+T2mdeBRSF9tIrvv+9cEsiWBaXQestDL3n+cGdd5+LS+ZjUWDOO1rYlESlt4g13VQHI0EmeG9TvrK9SkNmseFbgGBhq3B+8R0YMXjSVvsN2VtmOGLeAqJ9rfEMItp73s/2MFjlaUvnxQLHMS/11vhy5vTltdhmaLLEA/jCLQcNDR74ILpe/f469IdGpnSJwIDAQAB-----END PUBLIC KEY-----
     stdin_open: true
     tty: true
 
@@ -82,7 +84,6 @@ services:
       - DB_NAME=study
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - JWT_SECRET=super_secret_string_hello_world_1234567890
       - GATEWAY_HOST=gateway
       - GATEWAY_SERVER_PORT=1488
     stdin_open: true

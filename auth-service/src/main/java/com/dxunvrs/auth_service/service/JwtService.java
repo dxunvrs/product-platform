@@ -10,7 +10,7 @@ import java.util.Date;
 @Service
 public class JwtService {
     private final PrivateKey privateKey;
-    private final long expirationTime = 1000 * 60 * 15; // 15 минут
+    private final long expirationTime = 1000 * 60 * 5; // 15 минут
 
     public JwtService(JwtKeyProvider keyProvider) {
         this.privateKey = keyProvider.getPrivateKey();
@@ -18,8 +18,8 @@ public class JwtService {
 
     public String generateToken(int userId, String username) {
         return Jwts.builder()
-                .subject(username)
-                .claim("userId", userId)
+                .subject(String.valueOf(userId))
+                .claim("username", username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(privateKey, Jwts.SIG.RS256)

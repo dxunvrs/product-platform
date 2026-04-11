@@ -3,14 +3,12 @@ package db;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import exceptions.DBExecuteException;
-import exceptions.InvalidAuthorizeException;
 import models.Product;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
 import java.util.List;
 
 public class DBManager {
@@ -97,25 +95,6 @@ public class DBManager {
             return true;
         }
         return false;
-    }
-
-    // возвращает id зарегистрированного пользователя
-    public int registerUser(String username, String hash) {
-        try {
-            return orm.withExtension(UserDAO.class, dao -> dao.register(username, hash));
-        } catch (Exception e) {
-            throw new InvalidAuthorizeException("Данное имя уже занято");
-        }
-    }
-
-    public String getUserHash(String username) {
-        return orm.withExtension(UserDAO.class, dao ->
-            dao.getUserHashByUsername(username).orElseThrow(() -> new InvalidAuthorizeException("Такого пользователя не существует")));
-    }
-
-    public int getUserId(String username) {
-        return orm.withExtension(UserDAO.class, dao ->
-                dao.getIdByUsername(username).orElseThrow(() -> new InvalidAuthorizeException("Такого пользователя не существует")));
     }
 
     public void close() {

@@ -15,6 +15,7 @@ public class Request {
     private String commandName;
 
     private String token;
+    private int userId;
 
     private List<String> stringArgs;
     private List<Integer> intArgs;
@@ -31,6 +32,7 @@ public class Request {
         this.password = builder.password;
         this.commandName = builder.commandName;
         this.token = builder.token;
+        this.userId = builder.userId;
         this.stringArgs = builder.stringArgs;
         this.intArgs = builder.intArgs;
         this.objectArgs = builder.objectArgs;
@@ -41,6 +43,8 @@ public class Request {
     public String getToken() {
         return token;
     }
+
+    public int getUserId() { return userId; }
 
     public String getCommandName() {
         return commandName;
@@ -87,6 +91,7 @@ public class Request {
         private String commandName;
 
         private String token;
+        private int userId;
 
         private List<String> stringArgs;
         private List<Integer> intArgs;
@@ -103,6 +108,7 @@ public class Request {
             this.password = request.password;
             this.commandName = request.commandName;
             this.token = request.token;
+            this.userId = request.userId;
             this.stringArgs = request.stringArgs;
             this.intArgs = request.intArgs;
             this.objectArgs = request.objectArgs;
@@ -132,6 +138,11 @@ public class Request {
 
         public Builder token(String token) {
             this.token = token;
+            return this;
+        }
+
+        public Builder userId(int userId) {
+            this.userId = userId;
             return this;
         }
 

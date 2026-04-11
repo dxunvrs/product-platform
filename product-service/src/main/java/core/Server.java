@@ -6,10 +6,12 @@ import io.lettuce.core.RedisClient;
 import multithread.ProcessThread;
 import multithread.ReaderThread;
 import multithread.SenderThread;
-import network.*;
+import network.RawTCPRequest;
+import network.Request;
+import network.Response;
+import network.TCPConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import auth.AuthService;
 
 import java.io.IOException;
 import java.util.Scanner;
@@ -46,9 +48,8 @@ public class Server {
             RedisClient redisClient = RedisClient.create(redisUrl);
             collectionManager = new CollectionManager(dbManager, redisClient);
 
-            AuthService authService = new AuthService(dbManager);
             CommandManager commandManager = new CommandManager(collectionManager);
-            RequestHandler requestHandler = new RequestHandler(commandManager, authService);
+            RequestHandler requestHandler = new RequestHandler(commandManager);
 
             // инициализируем потоки-воркеры
             for (int i = 0; i < 10; i++) {

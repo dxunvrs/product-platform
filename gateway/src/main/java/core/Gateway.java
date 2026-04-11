@@ -1,5 +1,6 @@
 package core;
 
+import auth.AuthClient;
 import io.github.cdimascio.dotenv.Dotenv;
 import multithread.ReaderThread;
 import multithread.SenderThread;
@@ -37,9 +38,11 @@ public class Gateway {
                     Integer.parseInt(dotenv.get("GATEWAY_SERVER_PORT")),
                     responseQueue);
 
+            AuthClient authClient = new AuthClient(dotenv.get("AUTH_SERVICE_URL"), dotenv.get("PUBLIC_KEY"));
+
             // инициализируем потоки-воркеры
             for (int i = 0; i < 10; i++) {
-                readPool.execute(new ReaderThread(requestQueue, connectionManager));
+                readPool.execute(new ReaderThread(requestQueue, connectionManager, authClient));
             }
             for (int i = 0; i < 10; i++) {
                 sendPool.execute(new SenderThread(responseQueue, connectionManager));
@@ -49,7 +52,7 @@ public class Gateway {
             Runtime.getRuntime().addShutdownHook(new Thread(this::gatewayShutdown));
 
             runMainLoop();
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Ошибка", e);
         }
     }

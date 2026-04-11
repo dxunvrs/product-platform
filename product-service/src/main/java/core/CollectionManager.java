@@ -3,13 +3,13 @@ package core;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import db.DBManager;
 import exceptions.CommandExecutionException;
 import exceptions.DBExecuteException;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 import models.Product;
-import db.DBManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
