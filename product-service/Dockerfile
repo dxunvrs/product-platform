@@ -12,7 +12,4 @@ WORKDIR /app
 
 COPY --from=builder /build/product-service/build/libs/product-service.jar app.jar
 
-EXPOSE 1984/udp
-EXPOSE 1488
-
 ENTRYPOINT ["java", "-jar", "app.jar"]

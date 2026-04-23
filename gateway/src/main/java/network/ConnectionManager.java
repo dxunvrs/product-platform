@@ -22,6 +22,8 @@ public class ConnectionManager implements AutoCloseable {
     private final ServerSocketChannel tcpServerSocket;
 
     private final Map<SocketChannel, Queue<ByteBuffer>> serverQueue = new ConcurrentHashMap<>();
+    private final Queue<ResponsePacket> clientQueue = new ConcurrentLinkedQueue<>();
+
     private final BlockingQueue<RawResponse> responseQueue;
 
     private final List<SocketChannel> servers = Collections.synchronizedList(new ArrayList<>());
@@ -57,19 +59,20 @@ public class ConnectionManager implements AutoCloseable {
 
             if (key.isAcceptable()) {
                 serverAccept();
-                return null;
             }
             if (key.isReadable()) {
                 if (key.channel() instanceof DatagramChannel) {
                     return clientRead(key);
                 } else {
                     serverRead(key);
-                    return null;
                 }
             }
             if (key.isWritable()) {
-                serverWrite(key);
-                return null;
+                if (key.channel() instanceof DatagramChannel) {
+                    clientWrite(key);
+                } else {
+                    serverWrite(key);
+                }
             }
         }
         return null;
@@ -99,8 +102,27 @@ public class ConnectionManager implements AutoCloseable {
         return new RawUDPRequest((InetSocketAddress) clientAddress, bytes);
     }
 
-    public void clientSend(SocketAddress address, byte[] data) throws IOException {
-        udpChannel.send(ByteBuffer.wrap(data), address);
+    public void clientSend(ResponsePacket responsePacket) {
+        clientQueue.add(responsePacket);
+
+        SelectionKey key = udpChannel.keyFor(selector);
+        key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+        selector.wakeup();
+    }
+
+    private void clientWrite(SelectionKey key) {
+        DatagramChannel clientChannel = (DatagramChannel) key.channel();
+        try {
+            while (!clientQueue.isEmpty()) {
+                ResponsePacket responsePacket = clientQueue.peek();
+                if (responsePacket == null) return;
+                clientChannel.send(ByteBuffer.wrap(responsePacket.data()), responsePacket.address());
+                clientQueue.poll();
+            }
+            key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
+        } catch (IOException e) {
+            logger.error("Ошибка при отправке клиенту", e);
+        }
     }
 
     private void serverRead(SelectionKey key) {
@@ -121,26 +143,13 @@ public class ConnectionManager implements AutoCloseable {
         }
     }
 
-    private RawResponse decode(ByteBuffer buffer) {
-        buffer.flip();
-        if (buffer.remaining() < 4) {
-            buffer.compact();
-            return null;
-        }
+    public void serverSend(SocketChannel serverChannel, ByteBuffer buffer) {
+        Queue<ByteBuffer> queue = serverQueue.get(serverChannel);
 
-        buffer.mark();
-        int length = buffer.getInt();
-
-        if (buffer.remaining() < length) {
-            buffer.reset();
-            buffer.compact();
-            return null;
-        }
-
-        byte[] data = new byte[length];
-        buffer.get(data);
-        buffer.compact();
-        return new RawResponse(data);
+        queue.add(buffer);
+        SelectionKey key = serverChannel.keyFor(selector);
+        key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+        selector.wakeup();
     }
 
     private void serverWrite(SelectionKey key) {
@@ -166,13 +175,26 @@ public class ConnectionManager implements AutoCloseable {
         }
     }
 
-    public void serverSend(SocketChannel serverChannel, ByteBuffer buffer) {
-        Queue<ByteBuffer> queue = serverQueue.get(serverChannel);
+    private RawResponse decode(ByteBuffer buffer) {
+        buffer.flip();
+        if (buffer.remaining() < 4) {
+            buffer.compact();
+            return null;
+        }
 
-        queue.add(buffer);
-        SelectionKey key = serverChannel.keyFor(selector);
-        key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-        selector.wakeup();
+        buffer.mark();
+        int length = buffer.getInt();
+
+        if (buffer.remaining() < length) {
+            buffer.reset();
+            buffer.compact();
+            return null;
+        }
+
+        byte[] data = new byte[length];
+        buffer.get(data);
+        buffer.compact();
+        return new RawResponse(data);
     }
 
     public SocketChannel getNextServer() {

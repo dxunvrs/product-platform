@@ -50,44 +50,49 @@ public class ReaderThread implements Runnable {
                         if (token == null) {
                             return;
                         }
-                        connectionManager.clientSend(clientAddress, mapper.writeValueAsBytes(
+                        connectionManager.clientSend(new ResponsePacket(
+                                clientAddress, mapper.writeValueAsBytes(
                                 new Response.Builder().type(ResponseType.AUTH_SUCCESS).message("Вы успешно вошли").token(token).build()
-                        ));
+                        )));
                         return;
                     } else if (request.getType() == RequestType.REGISTER) {
                         String token = authClient.auth("/register", request.getUsername(), request.getPassword());
                         if (token == null) {
                             return;
                         }
-                        connectionManager.clientSend(clientAddress, mapper.writeValueAsBytes(
+                        connectionManager.clientSend(new ResponsePacket(
+                                clientAddress, mapper.writeValueAsBytes(
                                 new Response.Builder().type(ResponseType.AUTH_SUCCESS).message("Вы успешно зарегистрировались").token(token).build()
-                        ));
+                        )));
                         return;
                     } else if (request.getType() == RequestType.SERVER_COMMAND) {
                         try {
                             Claims claims = authClient.validate(fullRequest.getToken());
                             fullRequest = new Request.Builder(fullRequest).userId(Integer.parseInt(claims.getSubject())).build();
                         } catch (Exception e) {
-                            connectionManager.clientSend(clientAddress, mapper.writeValueAsBytes(
+                            connectionManager.clientSend(new ResponsePacket(
+                                    clientAddress, mapper.writeValueAsBytes(
                                     new Response.Builder().type(ResponseType.AUTH_REQUIRED).message("Пройдите авторизацию снова").build()
-                            ));
+                            )));
                             return;
                         }
                     }
                 } catch (InvalidAuthorizeException e) {
-                    connectionManager.clientSend(clientAddress, mapper.writeValueAsBytes(
+                    connectionManager.clientSend(new ResponsePacket(
+                            clientAddress, mapper.writeValueAsBytes(
                             new Response.Builder().type(ResponseType.AUTH_FAILED).message(e.getMessage()).build()
-                    ));
+                    )));
                     return;
                 }
 
                 SocketChannel currentServer = connectionManager.getNextServer();
                 if (currentServer == null) {
                     logger.error("Нет доступных серверов");
-                    connectionManager.clientSend(clientAddress,
-                            mapper.writeValueAsBytes(new Response.Builder().
-                                    type(ResponseType.ERROR).
-                                    message("Нет доступных серверов").build()));
+                    connectionManager.clientSend(new ResponsePacket(
+                            clientAddress, mapper.writeValueAsBytes(new Response.Builder().
+                            type(ResponseType.ERROR).
+                            message("Нет доступных серверов").build())
+                    ));
                     return;
                 }
                 byte[] requestBytes = mapper.writeValueAsBytes(fullRequest);

@@ -1,10 +1,11 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'com.gradleup.shadow' version '9.3.1'
 }
 
 group = 'com.dxunvrs'
-version = '1.0'
+version = '1.1'
 
 repositories {
     mavenCentral()
@@ -18,10 +19,30 @@ dependencies {
     implementation 'org.jdbi:jdbi3-sqlobject:3.52.0'
 }
 
+shadowJar {
+    archiveClassifier.set('')
+}
+
 publishing {
     publications {
-        maven(MavenPublication) {
-            from components.java
+        shadow(MavenPublication) {
+            groupId = project.group
+            artifactId = project.name
+            version = project.version
+
+            artifact shadowJar
+        }
+    }
+    repositories {
+        maven {
+            name = "reposiliteRepository"
+            url = "http://maven.dxunvrs.ru/releases"
+            allowInsecureProtocol = true
+
+            credentials {
+                username = REPOSILITE_USER
+                password = REPOSILITE_TOKEN
+            }
         }
     }
 }

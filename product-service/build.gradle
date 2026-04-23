@@ -8,6 +8,10 @@ version = '1.0'
 
 repositories {
     mavenCentral()
+    maven {
+        url "http://maven.dxunvrs.ru/releases"
+        allowInsecureProtocol = true
+    }
 }
 
 dependencies {
@@ -32,7 +36,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:2.0.17'
     implementation 'ch.qos.logback:logback-classic:latest.release'
 
-    implementation 'com.dxunvrs:common:1.0'
+    implementation 'com.dxunvrs:common:latest.release'
 }
 
 shadowJar {

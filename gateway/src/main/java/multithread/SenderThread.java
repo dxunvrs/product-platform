@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import network.ConnectionManager;
 import network.RawResponse;
 import network.Response;
+import network.ResponsePacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public class SenderThread implements Runnable {
                 logger.debug("Поток {} берет задачу отправки из очереди", Thread.currentThread().getName());
                 Response response = mapper.readValue(raw.data(), Response.class);
                 InetSocketAddress clientAddress = new InetSocketAddress(response.getHost(), response.getPort());
-                connectionManager.clientSend(clientAddress, raw.data());
+                connectionManager.clientSend(new ResponsePacket(clientAddress, raw.data()));
                 logger.info("От сервера получен ответ, перенаправление клиенту {}", clientAddress);
             } catch (IOException e) {
                 logger.error("Ошибка отправки", e);
