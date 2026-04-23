@@ -1,11 +1,10 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'com.gradleup.shadow' version '9.3.1'
 }
 
 group = 'com.dxunvrs'
-version = '1.1'
+version = '1.2'
 
 repositories {
     mavenCentral()
@@ -19,18 +18,10 @@ dependencies {
     implementation 'org.jdbi:jdbi3-sqlobject:3.52.0'
 }
 
-shadowJar {
-    archiveClassifier.set('')
-}
-
 publishing {
     publications {
-        shadow(MavenPublication) {
-            groupId = project.group
-            artifactId = project.name
-            version = project.version
-
-            artifact shadowJar
+        maven(MavenPublication) {
+            from components.java
         }
     }
     repositories {
